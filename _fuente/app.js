@@ -1,5 +1,6 @@
 (function(){
   var API = "https://script.google.com/macros/s/AKfycbwHFD9M5OT0B6RO3enJz9QMTSRl1b4OEPJCiqZ11AOsHBIscfVz_1qAhp2NbDJwckGahg/exec";
+  var K = "bse-ref-kL7vQx2mB9";
   var frm = document.getElementById("frm");
   var zona = document.getElementById("zona");
   var ref = "";
@@ -43,7 +44,7 @@
   }
 
   if (ref) {
-    fetch(API + "?api=cliente&ref=" + encodeURIComponent(ref))
+    fetch(API + "?api=cliente&k=" + encodeURIComponent(K) + "&ref=" + encodeURIComponent(ref))
       .then(function(r){ return r.json(); })
       .then(function(j){ if (j && j.ok && j.n) personalizar(j.n); })
       .catch(function(){});
@@ -62,6 +63,7 @@
     ["n","e","t","rn","rt","rc","i","s","c"].forEach(function(k){
       d[k] = frm.elements[k] ? frm.elements[k].value : "";
     });
+    d.k = K;
     fetch(API, {
       method: "POST",
       headers: { "Content-Type": "text/plain;charset=utf-8" },
