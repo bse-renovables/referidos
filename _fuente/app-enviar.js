@@ -21,13 +21,6 @@
       "Aquí lo tienes explicado, con el formulario para pasarnos el contacto:\n" + enlace();
   }
 
-  function telefono(v){
-    var s = String(v || "").replace(/[^0-9]/g, "");
-    if (s.length === 9) s = "34" + s;
-    if (s.indexOf("0034") === 0) s = s.slice(2);
-    return s;
-  }
-
   var tocado = false;
   frm.elements["m"].value = mensaje("");
   frm.elements["m"].addEventListener("input", function(){ tocado = true; });
@@ -36,24 +29,33 @@
   });
 
   pie.innerHTML = marca
-    ? 'El enlace lleva tu marca <span class="marca">' + marca + '</span>, así sabemos que el contacto viene de ti.'
+    ? 'El enlace del mensaje lleva tu marca <span class="marca">' + marca + '</span>, así sabemos que el contacto viene de ti.'
     : 'Este enlace no lleva marca de comercial. Pide el tuyo para que los contactos te cuenten a ti.';
 
-  document.getElementById("ir").addEventListener("click", function(){
-    var tel = telefono(frm.elements["t"].value);
-    if (tel.length < 11) { alert("Repasa el teléfono: escríbelo con los 9 dígitos."); return; }
-    var url = "https://wa.me/" + tel + "?text=" + encodeURIComponent(frm.elements["m"].value);
-    window.open(url, "_blank");
+  var cop = document.getElementById("cop");
+  cop.addEventListener("click", function(){
+    var txt = frm.elements["m"].value;
+    var fin = function(ok){
+      cop.textContent = ok ? "Copiado · ve a WhatsApp y pega" : "No se ha podido copiar, selecciónalo a mano";
+      setTimeout(function(){ cop.textContent = "Copiar el mensaje"; }, 3500);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(txt).then(function(){ fin(true); }).catch(function(){ manual(fin); });
+    } else {
+      manual(fin);
+    }
   });
 
-  document.getElementById("cop").addEventListener("click", function(){
-    var b = document.getElementById("cop");
-    var fin = function(ok){ b.textContent = ok ? "Mensaje copiado" : "Cópialo a mano"; setTimeout(function(){ b.textContent = "Copiar el mensaje"; }, 2500); };
-    var txt = frm.elements["m"].value;
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(txt).then(function(){ fin(true); }).catch(function(){ fin(false); });
-    } else {
-      try { frm.elements["m"].select(); document.execCommand("copy"); fin(true); } catch(e) { fin(false); }
-    }
+  function manual(fin){
+    try {
+      var t = frm.elements["m"];
+      t.focus();
+      t.setSelectionRange(0, t.value.length);
+      fin(document.execCommand("copy"));
+    } catch(e) { fin(false); }
+  }
+
+  document.getElementById("ir").addEventListener("click", function(){
+    window.open("https://wa.me/?text=" + encodeURIComponent(frm.elements["m"].value), "_blank");
   });
 })();
